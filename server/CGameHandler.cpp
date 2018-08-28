@@ -48,6 +48,8 @@
 #include "../lib/serializer/Connection.h"
 #include "../lib/serializer/Cast.h"
 #include "../lib/ScriptHandler.h"
+#include "../lib/events/EventBus.h"
+
 
 #ifndef _MSC_VER
 #include <boost/thread/xtime.hpp>
@@ -1539,6 +1541,12 @@ CGameHandler::~CGameHandler()
 	delete gs;
 }
 
+void CGameHandler::reinitScripting()
+{
+	serverEventBus = make_unique<events::EventBus>();
+	serverScripts.reset(new scripting::PoolImpl(this, this, serverEventBus.get()));
+}
+
 void CGameHandler::init(StartInfo *si)
 {
 	if (si->seedToBeUsed == 0)
@@ -1559,7 +1567,7 @@ void CGameHandler::init(StartInfo *si)
 		states.addPlayer(elem.first);
 	}
 
-	serverScripts.reset(new scripting::PoolImpl(this, this));
+	reinitScripting();
 }
 
 static bool evntCmp(const CMapEvent &a, const CMapEvent &b)
@@ -2784,7 +2792,7 @@ void CGameHandler::load(const std::string & filename)
 	logGlobal->info("Loading from %s", filename);
 	const auto stem	= FileInfo::GetPathStem(filename);
 
-	serverScripts.reset(new scripting::PoolImpl(this, this));
+	reinitScripting();
 
 	try
 	{
