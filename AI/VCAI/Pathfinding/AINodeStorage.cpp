@@ -240,7 +240,6 @@ bool AINodeStorage::hasBetterChain(const PathNodeInfo & source, CDestinationNode
 
 bool AINodeStorage::isTileAccessible(int3 pos, const EPathfindingLayer layer) const
 {
-	std::vector<AIPath> paths;
 	auto chains = nodes[pos.x][pos.y][pos.z][layer];
 
 	for(const AIPathNode & node : chains)
