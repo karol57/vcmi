@@ -180,7 +180,6 @@ bool Explore::fulfillsMe(TSubgoal goal)
 	return false;
 }
 
-#if 0
 bool Explore::hasReachableNeighbor(const int3 &pos, HeroPtr hero, CCallback * cbp, VCAI * vcai) const
 {
 	for(crint3 dir : int3::getDirs())
@@ -197,7 +196,6 @@ bool Explore::hasReachableNeighbor(const int3 &pos, HeroPtr hero, CCallback * cb
 
 	return false;
 }
-#endif
 
 int Explore::howManyTilesWillBeDiscovered(
 	const int3 & pos,
@@ -215,7 +213,8 @@ int Explore::howManyTilesWillBeDiscovered(
 			int3 npos = int3(x, y, pos.z);
 			if(cbp->isInTheMap(npos)
 				&& pos.dist2d(npos) - 0.5 < radious
-				&& !ts->fogOfWarMap[npos.x][npos.y][npos.z])
+				&& !ts->fogOfWarMap[npos.x][npos.y][npos.z]
+				&& hasReachableNeighbor(npos, h, cbp, aip))
 			{
 				ret++;
 			}

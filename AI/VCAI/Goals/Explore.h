@@ -51,9 +51,7 @@ namespace Goals
 		TSubgoal explorationNewPoint(HeroPtr h) const;
 		TSubgoal explorationBestNeighbour(int3 hpos, int radius, HeroPtr h) const;
 		TSubgoal explorationScanRange(HeroPtr h, std::vector<int3> & range) const;
-		#if 0
 		bool hasReachableNeighbor(const int3 &pos, HeroPtr hero, CCallback * cbp, VCAI * vcai) const;
-		#endif
 
 		void getVisibleNeighbours(
 			const std::vector<int3> & tiles,
