@@ -157,6 +157,7 @@ CGPathNode * NodeStorage::getInitialNode()
 
 	initialNode->turns = 0;
 	initialNode->moveRemains = out.hero->movement;
+	initialNode->cost = 0.0;
 
 	return initialNode;
 }
@@ -164,6 +165,7 @@ CGPathNode * NodeStorage::getInitialNode()
 void NodeStorage::commit(CDestinationNodeInfo & destination, const PathNodeInfo & source)
 {
 	assert(destination.node != source.node->theNodeBefore); //two tiles can't point to each other
+	destination.node->cost = destination.cost;
 	destination.node->moveRemains = destination.movementLeft;
 	destination.node->turns = destination.turn;
 	destination.node->theNodeBefore = source.node;
@@ -193,16 +195,24 @@ void MovementCostRule::process(
 	const PathfinderConfig * pathfinderConfig,
 	CPathfinderHelper * pathfinderHelper) const
 {
-	int turnAtNextTile = destination.turn, moveAtNextTile = destination.movementLeft;
+	bool textTurn = false;
+	float costAtNextTile = destination.cost;
+	int turnAtNextTile = destination.turn;
+	int moveAtNextTile = destination.movementLeft;
 	int cost = pathfinderHelper->getMovementCost(source, destination, moveAtNextTile);
 	int remains = moveAtNextTile - cost;
+	int maxMovePoints = pathfinderHelper->getMaxMovePoints(destination.node->layer);
 	if(remains < 0)
 	{
 		//occurs rarely, when hero with low movepoints tries to leave the road
 		pathfinderHelper->updateTurnInfo(++turnAtNextTile);
-		moveAtNextTile = pathfinderHelper->getMaxMovePoints(destination.node->layer);
+
+		maxMovePoints = pathfinderHelper->getMaxMovePoints(destination.node->layer);
+		moveAtNextTile = maxMovePoints;
+
 		cost = pathfinderHelper->getMovementCost(source, destination, moveAtNextTile); //cost must be updated, movement points changed :(
 		remains = moveAtNextTile - cost;
+		textTurn = true;
 	}
 	if(destination.action == CGPathNode::EMBARK || destination.action == CGPathNode::DISEMBARK)
 	{
@@ -211,6 +221,12 @@ void MovementCostRule::process(
 		remains = pathfinderHelper->movementPointsAfterEmbark(moveAtNextTile, cost, destination.action - 1);
 	}
 
+	if(textTurn)
+		costAtNextTile = static_cast<float>(turnAtNextTile) +  static_cast<float>(cost) / maxMovePoints;
+	else
+		costAtNextTile += static_cast<float>(cost) / maxMovePoints;
+
+	destination.cost = costAtNextTile;
 	destination.turn = turnAtNextTile;
 	destination.movementLeft = remains;
 
@@ -297,12 +313,16 @@ void CPathfinder::calculatePaths()
 		pq.pop();
 		source.node->locked = true;
 
-		int movement = source.node->moveRemains, turn = source.node->turns;
+		int movement = source.node->moveRemains;
+		uint8_t turn = source.node->turns;
+		float cost = source.node->cost;
+
 		hlp->updateTurnInfo(turn);
 		if(!movement)
 		{
 			hlp->updateTurnInfo(++turn);
 			movement = hlp->getMaxMovePoints(source.node->layer);
+			cost = static_cast<float>(turn);
 			if(!hlp->passOneTurnLimitCheck(source))
 				continue;
 		}
@@ -332,7 +352,7 @@ void CPathfinder::calculatePaths()
 
 			destination.turn = turn;
 			destination.movementLeft = movement;
-
+			destination.cost = cost;
 			destination.guarded = isDestinationGuarded();
 			destination.isGuardianTile = destination.guarded && isDestinationGuardian();
 			if(destination.nodeObject)
@@ -374,6 +394,7 @@ void CPathfinder::calculatePaths()
 			destination.setNode(gs, teleportNode);
 			destination.turn = turn;
 			destination.movementLeft = movement;
+			destination.cost = cost;
 
 			if(destination.isBetterWay())
 			{
@@ -1295,15 +1316,6 @@ bool CPathsInfo::getPath(CGPath & out, const int3 & dst) const
 	return true;
 }
 
-int CPathsInfo::getDistance(const int3 & tile) const
-{
-	CGPath ret;
-	if(getPath(ret, tile))
-		return ret.nodes.size();
-	else
-		return 255;
-}
-
 const CGPathNode * CPathsInfo::getNode(const int3 & coord) const
 {
 	auto landNode = &nodes[coord.x][coord.y][coord.z][ELayer::LAND];
@@ -1335,7 +1347,9 @@ void PathNodeInfo::setNode(CGameState * gs, CGPathNode * n, bool excludeTopObjec
 }
 
 CDestinationNodeInfo::CDestinationNodeInfo()
-	: PathNodeInfo(), blocked(false), action(CGPathNode::ENodeAction::UNKNOWN)
+	: PathNodeInfo(),
+	blocked(false),
+	action(CGPathNode::ENodeAction::UNKNOWN)
 {
 }
 
@@ -1351,13 +1365,8 @@ bool CDestinationNodeInfo::isBetterWay() const
 {
 	if(node->turns == 0xff) //we haven't been here before
 		return true;
-	else if(node->turns > turn)
-		return true;
-	else if(node->turns >= turn && node->moveRemains < movementLeft) //this route is faster
-		return true;
-
-	return false;
-
+	else
+		return cost < node->cost; //this route is faster
 }
 
 bool PathNodeInfo::isNodeObjectVisitable() const

@@ -191,15 +191,7 @@ bool CDistanceSorter::operator()(const CGObjectInstance * lhs, const CGObjectIns
 	const CGPathNode * ln = ai->myCb->getPathsInfo(hero)->getPathInfo(lhs->visitablePos());
 	const CGPathNode * rn = ai->myCb->getPathsInfo(hero)->getPathInfo(rhs->visitablePos());
 
-	if(ln->turns != rn->turns)
-		return ln->turns < rn->turns;
-
-	return (ln->moveRemains > rn->moveRemains);
-}
-
-bool compareMovement(HeroPtr lhs, HeroPtr rhs)
-{
-	return lhs->movement > rhs->movement;
+	return ln->cost < rn->cost;
 }
 
 ui64 evaluateDanger(crint3 tile)
@@ -528,15 +520,4 @@ bool compareArtifacts(const CArtifactInstance * a1, const CArtifactInstance * a2
 		return true;
 	else
 		return false;
-}
-
-uint32_t distanceToTile(const CGHeroInstance * hero, int3 pos)
-{
-	auto pathInfo = cb->getPathsInfo(hero)->getPathInfo(pos);
-	uint32_t totalMovementPoints = pathInfo->turns * hero->maxMovePoints(true) + hero->movement;
-
-	if(totalMovementPoints < pathInfo->moveRemains) // should not be but who knows
-		return 0;
-
-	return totalMovementPoints - pathInfo->moveRemains;
 }

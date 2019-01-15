@@ -1305,12 +1305,12 @@ void VCAI::recruitCreatures(const CGDwelling * d, const CArmedInstance * recruit
 	}
 }
 
-bool VCAI::isGoodForVisit(const CGObjectInstance * obj, HeroPtr h, boost::optional<uint32_t> movementCostLimit)
+bool VCAI::isGoodForVisit(const CGObjectInstance * obj, HeroPtr h, boost::optional<float> movementCostLimit)
 {
 	int3 op = obj->visitablePos();
 	auto paths = ah->getPathsToTile(h, op);
 
-	for(auto path : paths)
+	for(const auto & path : paths)
 	{
 		if(movementCostLimit && movementCostLimit.get() < path.movementCost())
 			return false;
@@ -1426,18 +1426,18 @@ void VCAI::wander(HeroPtr h)
 		});
 
 		int pass = 0;
-		std::vector<boost::optional<ui32>> distanceLimits =
+		std::vector<boost::optional<float>> distanceLimits =
 		{
-			h->movement,
-			h->movement + h->maxMovePoints(true),
+			1.0,
+			2.0,
 			boost::none
 		};
 
 		while(!dests.size() && pass < distanceLimits.size())
 		{
-			boost::optional<ui32> distanceLimit = distanceLimits[pass];
+			auto & distanceLimit = distanceLimits[pass];
 
-			logAi->debug("Looking for wander destination pass=%i, distance limit=%i", pass, distanceLimit.get_value_or(-1));
+			logAi->debug("Looking for wander destination pass=%i, cost limit=%f", pass, distanceLimit.get_value_or(-1.0));
 
 			vstd::copy_if(visitableObjs, std::back_inserter(dests), [&](ObjectIdRef obj) -> bool
 			{
