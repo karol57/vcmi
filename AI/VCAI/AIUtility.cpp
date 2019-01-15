@@ -402,6 +402,7 @@ bool isBlockedBorderGate(int3 tileToHit) //TODO: is that function needed? should
 	auto gate = dynamic_cast<const CGKeys *>(cb->getTile(tileToHit)->topVisitableObj());
 	return !gate->passableFor(ai->playerID);
 }
+
 bool isBlockVisitObj(const int3 & pos)
 {
 	if(auto obj = cb->getTopObj(pos))
@@ -430,7 +431,6 @@ creInfo infoFromDC(const dwellingContent & dc)
 	}
 	return ci;
 }
-
 
 ui64 howManyReinforcementsCanBuy(const CArmedInstance * h, const CGDwelling * t)
 {

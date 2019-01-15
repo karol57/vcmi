@@ -253,11 +253,12 @@ TSubgoal Explore::explorationBestNeighbour(int3 hpos, int radius, HeroPtr h) con
 	if(dstToRevealedTiles.empty()) //yes, it DID happen!
 		return sptr(Invalid());
 
+	auto paths = cb->getPathsInfo(h.get());
+
 	auto best = dstToRevealedTiles.begin();
 	for(auto i = dstToRevealedTiles.begin(); i != dstToRevealedTiles.end(); i++)
 	{
-		const CGPathNode * pn = cb->getPathsInfo(h.get())->getPathInfo(i->first);
-		//const TerrainTile *t = cb->getTile(i->first);
+		const CGPathNode * pn = paths->getPathInfo(i->first);
 		if(best->second < i->second && pn->reachable() && pn->accessible == CGPathNode::ACCESSIBLE)
 			best = i;
 	}

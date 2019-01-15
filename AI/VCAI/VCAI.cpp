@@ -65,31 +65,6 @@ struct SetGlobalState
 #define NET_EVENT_HANDLER SET_GLOBAL_STATE(this)
 #define MAKING_TURN SET_GLOBAL_STATE(this)
 
-void foreach_tile(std::vector<std::vector<std::vector<unsigned char>>> & vectors, std::function<void(unsigned char & in)> foo)
-{
-	for(auto & vector : vectors)
-	{
-		for(auto j = vector.begin(); j != vector.end(); j++)
-		{
-			for(auto & elem : *j)
-				foo(elem);
-		}
-	}
-}
-
-struct ObjInfo
-{
-	int3 pos;
-	std::string name;
-	ObjInfo(){}
-	ObjInfo(const CGObjectInstance * obj)
-		: pos(obj->pos), name(obj->getObjectName())
-	{
-	}
-};
-
-std::map<const CGObjectInstance *, ObjInfo> helperObjInfo;
-
 VCAI::VCAI()
 {
 	LOG_TRACE(logAi);
@@ -1776,7 +1751,6 @@ std::vector<const CGObjectInstance *> VCAI::getFlaggedObjects() const
 void VCAI::addVisitableObj(const CGObjectInstance * obj)
 {
 	visitableObjs.insert(obj);
-	helperObjInfo[obj] = ObjInfo(obj);
 
 	// All teleport objects seen automatically assigned to appropriate channels
 	auto teleportObj = dynamic_cast<const CGTeleport *>(obj);
