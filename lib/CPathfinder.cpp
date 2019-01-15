@@ -947,11 +947,6 @@ bool CPathfinderHelper::addTeleportWhirlpool(const CGWhirlpool * obj) const
 	return options.useTeleportWhirlpool && hasBonusOfType(Bonus::WHIRLPOOL_PROTECTION) && obj;
 }
 
-int CPathfinderHelper::getHeroMaxMovementPoints(EPathfindingLayer layer) const
-{
-	return hero->maxMovePoints(layer);
-}
-
 int CPathfinderHelper::movementPointsAfterEmbark(int movement, int turn, int action) const
 {
 	return hero->movementPointsAfterEmbark(movement, turn, action, getTurnInfo());
@@ -1054,9 +1049,9 @@ int TurnInfo::valOfBonuses(Bonus::BonusType type, int subtype) const
 int TurnInfo::getMaxMovePoints(const EPathfindingLayer layer) const
 {
 	if(maxMovePointsLand == -1)
-		maxMovePointsLand = hero->maxMovePoints(true, this);
+		maxMovePointsLand = hero->maxMovePointsCached(true, this);
 	if(maxMovePointsWater == -1)
-		maxMovePointsWater = hero->maxMovePoints(false, this);
+		maxMovePointsWater = hero->maxMovePointsCached(false, this);
 
 	return layer == EPathfindingLayer::SAIL ? maxMovePointsWater : maxMovePointsLand;
 }

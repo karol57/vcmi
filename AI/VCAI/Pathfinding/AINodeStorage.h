@@ -42,7 +42,6 @@ struct AIPathNode : public CGPathNode
 
 struct AIPathNodeInfo
 {
-	uint32_t movementPointsLeft;
 	uint32_t movementPointsUsed;
 	int turns;
 	int3 coord;

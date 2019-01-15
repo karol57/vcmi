@@ -49,7 +49,7 @@ struct DLL_LINKAGE CGPathNode
 		NOT_SET = 0,
 		ACCESSIBLE = 1, //tile can be entered and passed
 		VISITABLE, //tile can be entered as the last tile in path
-		BLOCKVIS,  //visitable from neighbouring tile but not passable
+		BLOCKVIS,  //visitable from neighboring tile but not passable
 		FLYABLE, //can only be accessed in air layer
 		BLOCKED //tile can't be entered nor visited
 	};
@@ -57,7 +57,7 @@ struct DLL_LINKAGE CGPathNode
 	CGPathNode * theNodeBefore;
 	int3 coord; //coordinates
 	ui32 moveRemains; //remaining tiles after hero reaches the tile
-	ui8 turns; //how many turns we have to wait before reachng the tile - 0 means current turn
+	ui8 turns; //how many turns we have to wait before reaching the tile - 0 means current turn
 	ELayer layer;
 	EAccessibility accessible;
 	ENodeAction action;
@@ -532,7 +532,6 @@ public:
 		);
 	}
 
-	int getHeroMaxMovementPoints(EPathfindingLayer layer) const;
 	int movementPointsAfterEmbark(int movement, int cost, int action) const;
 	bool passOneTurnLimitCheck(const PathNodeInfo & source) const;
 };

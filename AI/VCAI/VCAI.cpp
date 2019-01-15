@@ -1016,13 +1016,13 @@ void VCAI::mainLoop()
 			//remove goals we couldn't decompose
 			for (auto goal : goalsToRemove)
 				vstd::erase_if_present(basicGoals, goal);
-			
+
 			//add abstract goals
 			boost::sort(goalsToAdd, [](const Goals::TSubgoal & lhs, const Goals::TSubgoal & rhs) -> bool
 			{
 				return lhs->priority > rhs->priority; //highest priority at the beginning
 			});
-			
+
 			//max number of goals = 10
 			int i = 0;
 			while (basicGoals.size() < 10 && goalsToAdd.size() > i)
@@ -1426,7 +1426,8 @@ void VCAI::wander(HeroPtr h)
 		});
 
 		int pass = 0;
-		std::vector<boost::optional<ui32>> distanceLimits = {
+		std::vector<boost::optional<ui32>> distanceLimits =
+		{
 			h->movement,
 			h->movement + h->maxMovePoints(true),
 			boost::none
@@ -2220,8 +2221,8 @@ void VCAI::tryRealize(Goals::BuyArmy & g)
 		{
 			auto ci = infoFromDC(t->creatures[i]);
 
-			if(!ci.count 
-				|| ci.creID == -1 
+			if(!ci.count
+				|| ci.creID == -1
 				|| (g.objid != -1 && ci.creID != g.objid)
 				|| t->getUpperArmy()->getSlotFor(ci.creID) == SlotID())
 				continue;

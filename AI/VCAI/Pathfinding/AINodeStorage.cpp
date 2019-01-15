@@ -273,7 +273,7 @@ std::vector<AIPath> AINodeStorage::getChainInfo(int3 pos, bool isOnLand) const
 		{
 			AIPathNodeInfo pathNode;
 
-			pathNode.movementPointsLeft = current->moveRemains;
+			//FIXME: this is not correct, maxMovePoints depends on layer and turn
 			pathNode.movementPointsUsed = (int)(current->turns * hero->maxMovePoints(true) + hero->movement) - (int)current->moveRemains;
 			pathNode.turns = current->turns;
 			pathNode.danger = current->danger;
