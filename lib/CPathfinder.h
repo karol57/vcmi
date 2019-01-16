@@ -531,6 +531,6 @@ public:
 		);
 	}
 
-	int movementPointsAfterEmbark(int movement, int cost, int action) const;
+	int movementPointsAfterEmbark(int movement, int basicCost, bool disembark) const;
 	bool passOneTurnLimitCheck(const PathNodeInfo & source) const;
 };

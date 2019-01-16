@@ -195,7 +195,7 @@ void MovementCostRule::process(
 	const PathfinderConfig * pathfinderConfig,
 	CPathfinderHelper * pathfinderHelper) const
 {
-	bool textTurn = false;
+	bool nextTurn = false;
 	float costAtNextTile = destination.cost;
 	int turnAtNextTile = destination.turn;
 	int moveAtNextTile = destination.movementLeft;
@@ -205,6 +205,7 @@ void MovementCostRule::process(
 	if(remains < 0)
 	{
 		//occurs rarely, when hero with low movepoints tries to leave the road
+		costAtNextTile += static_cast<float>(moveAtNextTile) / maxMovePoints;//we spent all points of current turn
 		pathfinderHelper->updateTurnInfo(++turnAtNextTile);
 
 		maxMovePoints = pathfinderHelper->getMaxMovePoints(destination.node->layer);
@@ -212,19 +213,18 @@ void MovementCostRule::process(
 
 		cost = pathfinderHelper->getMovementCost(source, destination, moveAtNextTile); //cost must be updated, movement points changed :(
 		remains = moveAtNextTile - cost;
-		textTurn = true;
+		nextTurn = true;
 	}
+
 	if(destination.action == CGPathNode::EMBARK || destination.action == CGPathNode::DISEMBARK)
 	{
 		/// FREE_SHIP_BOARDING bonus only remove additional penalty
 		/// land <-> sail transition still cost movement points as normal movement
-		remains = pathfinderHelper->movementPointsAfterEmbark(moveAtNextTile, cost, destination.action - 1);
+		remains = pathfinderHelper->movementPointsAfterEmbark(moveAtNextTile, cost, (destination.action == CGPathNode::DISEMBARK));
+		cost = moveAtNextTile - remains;
 	}
 
-	if(textTurn)
-		costAtNextTile = static_cast<float>(turnAtNextTile) +  static_cast<float>(cost) / maxMovePoints;
-	else
-		costAtNextTile += static_cast<float>(cost) / maxMovePoints;
+	costAtNextTile += static_cast<float>(cost) / maxMovePoints;
 
 	destination.cost = costAtNextTile;
 	destination.turn = turnAtNextTile;
@@ -322,7 +322,6 @@ void CPathfinder::calculatePaths()
 		{
 			hlp->updateTurnInfo(++turn);
 			movement = hlp->getMaxMovePoints(source.node->layer);
-			cost = static_cast<float>(turn);
 			if(!hlp->passOneTurnLimitCheck(source))
 				continue;
 		}
@@ -968,9 +967,9 @@ bool CPathfinderHelper::addTeleportWhirlpool(const CGWhirlpool * obj) const
 	return options.useTeleportWhirlpool && hasBonusOfType(Bonus::WHIRLPOOL_PROTECTION) && obj;
 }
 
-int CPathfinderHelper::movementPointsAfterEmbark(int movement, int turn, int action) const
+int CPathfinderHelper::movementPointsAfterEmbark(int movement, int basicCost, bool disembark) const
 {
-	return hero->movementPointsAfterEmbark(movement, turn, action, getTurnInfo());
+	return hero->movementPointsAfterEmbark(movement, basicCost, disembark, getTurnInfo());
 }
 
 bool CPathfinderHelper::passOneTurnLimitCheck(const PathNodeInfo & source) const
