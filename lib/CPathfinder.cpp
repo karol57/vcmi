@@ -195,7 +195,6 @@ void MovementCostRule::process(
 	const PathfinderConfig * pathfinderConfig,
 	CPathfinderHelper * pathfinderHelper) const
 {
-	bool nextTurn = false;
 	float costAtNextTile = destination.cost;
 	int turnAtNextTile = destination.turn;
 	int moveAtNextTile = destination.movementLeft;
@@ -213,7 +212,6 @@ void MovementCostRule::process(
 
 		cost = pathfinderHelper->getMovementCost(source, destination, moveAtNextTile); //cost must be updated, movement points changed :(
 		remains = moveAtNextTile - cost;
-		nextTurn = true;
 	}
 
 	if(destination.action == CGPathNode::EMBARK || destination.action == CGPathNode::DISEMBARK)
